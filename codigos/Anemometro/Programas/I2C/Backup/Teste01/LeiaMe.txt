@@ -1,0 +1,11 @@
+PAR DE PROGRAMAS PARA TESTE DE REDE I2C
+=======================================
+
+AT_T01: Para uso na família AT (Atmel) (ATMega328P, ATTiny85, etc.)
+Descrição: torna o microcontrolador da família Atmel um "cliente" ou
+"escravo" que envia dados para o "servidor" ou "mestre" da rede, em
+nosso caso, o ESP32.
+
+ESP32_T01: programa em MicroPython para uso no ESP32.
+Descrição: localiza os dispositivos "clientes" ou "escravos" na rede,
+e coleta 18 bytes dos dados nele disponíveis.
