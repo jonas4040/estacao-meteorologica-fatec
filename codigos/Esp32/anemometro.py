@@ -69,6 +69,7 @@ class Anemometro:
     def velocidade(self, i2c, endereco, tipo=2):
         buffer = i2c.readfrom(endereco, 15)             # lê 15 bytes do Anemômetro (endereço #9)
         b = ""
+        #print(buffer)
 
         for j in buffer:
             b = b + chr(j)
