@@ -1,6 +1,8 @@
 #include <Wire.h>
 #include <Arduino.h>
 
+//commit de teste jonas
+
 int direcao[8] = {0, 45, 90, 135, 180, 225, 270, 315};
 int direcaoInt = 0;
 
