@@ -3,7 +3,7 @@
 #==                                                             ==#
 #==  Projeto....: Estação Meteorológica                         ==#
 #==  Instituição: FATEC-JD - Sistemas Embarcados                ==#
-#==  Data.......: Maio/2022                                     ==#
+#==  Data.......: Maio/2023                                     ==#
 #==                                                             ==#
 #==  Trabalho da disciplina Projeto Integrador II               ==#
 #==                                                             ==#
