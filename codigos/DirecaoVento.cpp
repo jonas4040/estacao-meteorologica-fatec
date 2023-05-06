@@ -13,6 +13,7 @@ void setup(){
 	attachInterrupt(0 , mudancaDeEstado, RISING);
 }
 
+//delay infinito
 void loop(){
 	delay(99999999999);
 }
