@@ -2,6 +2,7 @@
 #include <Arduino.h>
 
 //commit de teste jonas
+// commit de teste erick
 
 int direcao[8] = {0, 45, 90, 135, 180, 225, 270, 315};
 int direcaoInt = 0;
