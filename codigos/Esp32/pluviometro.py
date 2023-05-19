@@ -62,8 +62,12 @@ class Pluviometro(object):
         return self._get_valor_mm()
         
 
-        
-       
+pluviometro = Pluviometro(13, 0.25)
+while True:
+    valor = pluviometro.iniciar_medicao()
+    print(f'Valor: {valor}')
+    sleep(0.2)
+    print()
         
         
         

@@ -82,9 +82,9 @@ html = """<!DOCTYPE html>
 print("Iniciando WiFi...")
 estacao = network.WLAN(network.STA_IF)
 estacao.active(True)
-#estacao.connect('FatecJdi - Sala Projetos SE', 'FatecJdi2021!')
+estacao.connect('FatecJdi - Alunos', 'FatecJdi2023!')
 #estacao.connect('Soares','Jomi11022016')
-estacao.connect('Galaxy A22B324','rvno1991')
+#estacao.connect('','felipe100')
 
 while estacao.isconnected() == False:
     pass
@@ -240,3 +240,4 @@ except OSError as Err:
 except KeyboardInterrupt:
   s.close()
   estacao.active(False)
+
