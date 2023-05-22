@@ -63,7 +63,8 @@ while True:
     print()
     valor_anterior = valor
     time_decorrido = int(time_final - time_inicial)
-    if tempo_decorrido > 180
+    if tempo_decorrido > 180:
+        tempo_final = time()
     sleep(0.2)'''
     
         
