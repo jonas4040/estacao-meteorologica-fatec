@@ -55,16 +55,10 @@ class Pluviometro(object):
         
 
 '''pluviometro = Pluviometro(13, 0.7859503363)
-valor_anterior = 0
-time_inicial = time()
 while True:
     valor = pluviometro.iniciar_medicao()
     print(f'Pluviômetro: {valor}mm')
     print()
-    valor_anterior = valor
-    time_decorrido = int(time_final - time_inicial)
-    if time_decorrido > 180:
-        time_final = time()
     sleep(0.2)'''
     
         
