@@ -60,6 +60,20 @@ while True:
     print(f'Pluviômetro: {valor}mm')
     print()
     sleep(0.2)'''
+
+
+# Interromper em uma determinada hora e minuto 
+'''from time import ctime
+
+while True:
+    tempo_atual = ((ctime().split())[3]).split(':')
+    hora = int(tempo_atual[0])
+    minunto = int(tempo_atual[1])
+    if (hora == 10) and (minunto >= 50):
+        # No caso do pluviometro, resetar o contador de pulsos para
+        # iniciar a contagem do dia seguinte
+        break
+    print(f'{hora}:{minunto}')'''
     
         
         
