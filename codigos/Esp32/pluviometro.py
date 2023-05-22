@@ -45,14 +45,6 @@ class Pluviometro(object):
         return self._valor_pluv
     
     
-    # Para os testes, utilize _thread no módulo principal
-    def no_terminal(self):
-        while True:
-            print(f'Qtde de pulsos: {self._get_cont_p()}')
-            print(f'Total de {self._get_valor_mm()}mm')
-            sleep(0.2)
-    
-    
     def iniciar_medicao(self):
         self._set_valor_pluv(self._pluviometro.value())
         if self._get_valor_pluv() and self._get_anterior() == 0:
@@ -62,12 +54,18 @@ class Pluviometro(object):
         return self._get_valor_mm()
         
 
-pluviometro = Pluviometro(13, 0.25)
+'''pluviometro = Pluviometro(13, 0.7859503363)
+valor_anterior = 0
+time_inicial = time()
 while True:
     valor = pluviometro.iniciar_medicao()
-    print(f'Valor: {valor}')
-    sleep(0.2)
+    print(f'Pluviômetro: {valor}mm')
     print()
+    valor_anterior = valor
+    time_decorrido = int(time_final - time_inicial)
+    if tempo_decorrido > 180
+    sleep(0.2)'''
+    
         
         
         
