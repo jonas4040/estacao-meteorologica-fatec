@@ -106,9 +106,9 @@ estacao.connect('Ez','12345678')
 while estacao.isconnected() == False:
     pass
 print(estacao.ifconfig())
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.bind(('', 80))
-s.listen(5)
+#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+#s.bind(('', 80))
+#s.listen(5)
 servidor = 'test.mosquitto.org' 
 cliente = MQTTClient('NodeMCU', servidor, 1883)
 print('Conexao realizada.')
@@ -125,7 +125,7 @@ try:
 
         #-- Loop infinito caso exista algum dispositivo...
         while (True):
-            conexao, endereco = s.accept()
+            '''conexao, endereco = s.accept()
             print("Conexao de %s" % str(endereco))
             requisicao = conexao.recv(1024)
             requisicao = str(requisicao)
@@ -134,7 +134,7 @@ try:
             conexao.send('HTTP/1.1 200 OK\n')
             conexao.send('Content-Type: text/html\n')
             conexao.send('Connection: close\n\n')
-
+'''
             #-- Varre todos os dispositivos da rede e "pega" o 
             #   que eles estão escrevendo no intervalo de 1 segundo
             for i in dispositivos:
@@ -246,8 +246,8 @@ try:
 
 #TODO: COLOCAR AQUI o HTML
             html = """<!DOCTYPE html><html><head><title></title><meta charset="utf-8"></head><body><form><p align="center">""" + str(strBufTransmissao) + """</p></form></body></html>"""
-            conexao.sendall(html)
-            conexao.close()
+            #conexao.sendall(html)
+            #conexao.close()
             
             print('Publicando no servidor MQTT') 
             
@@ -267,9 +267,11 @@ try:
 
             gc.collect()
             sleep(3)
-except OSError as Err:
-    print("Erro:", Err, "\n", "Tipo do erro: ", type(Err))
-    print("Provável erro de comunicação com o dispositivo:",i)
+except Exception as Err:
+#except OSError as Err:
+    pass
+    #print("Erro:", Err, "\n", "Tipo do erro: ", type(Err).__name__)
+    #print("Provável erro de comunicação com o dispositivo:",i)
 
 except KeyboardInterrupt:
   s.close()
