@@ -19,6 +19,7 @@
 #== Importação de classes gerais
 from machine import Pin, I2C
 from time import time, sleep
+from time import ctime
 
 #== Classes específicas do projeto (sensores)
 from anemometro import Anemometro   # Velocidade do vento
@@ -27,6 +28,7 @@ from aht import AHT2x               # Temperatura e umidade
 from ccs811 import CCS811           # Nível de Co2 e VTOC
 from RoTW import RoTW               # Rosa dos Ventos
 import bh1750                       # Luminosidade
+from pluviometro import Pluviometro
 
 #== Classes para configuração do ESP32 como servidor WEB E mqtt
 from umqtt.simple import MQTTClient
@@ -66,7 +68,6 @@ def resetar():
 
 #-- Instancia objeto I2C com os pinos SCL e SDA definidos CCS811
 i2c = I2C(0, scl=Pin(22), sda=Pin(21))
-
 #-- A lista "dispositivos" recebe um array de dispositivos encontrados
 dispositivos = localizaDispI2C()
 transicao = ""
@@ -232,7 +233,7 @@ try:
             #======= Bloco de tratamento do sensor     ====#
             #======= BH1750 (Luminosidade)           ======#
             #==============================================#
-
+                
                 elif ((i == 0x23) or (i == 0x5C)):
                     captura = bh1750.BH1750(i2c)
                     mesure_lux = captura.leitura_lux(bh1750.MODE_CONTINU_HAUTE_RESOLUTION)
@@ -251,6 +252,20 @@ try:
             #======= Bloco de tratamento do sensor reed-switch   ====#
             #======= Pluviometro (Precipitação pluviométrica)    ====#
             #========================================================#
+                pluv = Pluviometro(23, 0.7859503363)
+                pluv.iniciar_medicao()
+                   
+                tempo_atual = ((ctime().split())[3]).split(':')
+                hora = int(tempo_atual[0])
+                minunto = int(tempo_atual[1])
+                
+                if (hora == 23) and (minunto >= 59):
+                    pluv._set_cont_pulso(0)
+                
+                
+                
+                    
+                    
 
 #TODO: COLOCAR AQUI o HTML
             html = """<!DOCTYPE html><html><head><title></title><meta charset="utf-8"></head><body><form><p align="center">""" + str(strBufTransmissao) + """</p></form></body></html>"""
