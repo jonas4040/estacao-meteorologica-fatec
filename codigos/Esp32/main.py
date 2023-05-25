@@ -53,6 +53,13 @@ def localizaDispI2C():
         print("Endereço decimal: ",dispositivo," | Endereço hexadecimal: ",hex(dispositivo))
     return dispositivos
 
+#============= RECONECTA MQTT =================#
+def resetar():
+  print('Falha ao conectar ao MQTT broker. Resetando e reconectando...')
+  time.sleep(10)
+  machine.reset()
+#==============================================#
+
 #==============================================#
 #============= Programa Principal =============#
 #==============================================#
@@ -98,10 +105,10 @@ html = """<!DOCTYPE html>
 print("Iniciando WiFi...")
 estacao = network.WLAN(network.STA_IF)
 estacao.active(True)
-#estacao.connect('FatecJdi - Alunos', 'FatecJdi2023!')
+estacao.connect('FatecJdi - Alunos', 'FatecJdi2023!')
 #estacao.connect('Soares','Jomi11022016')
 #estacao.connect('','felipe100')
-estacao.connect('Ez','12345678')
+#estacao.connect('Ez','12345678')
 
 while estacao.isconnected() == False:
     pass
@@ -109,8 +116,9 @@ print(estacao.ifconfig())
 #s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #s.bind(('', 80))
 #s.listen(5)
-servidor = 'test.mosquitto.org' 
-cliente = MQTTClient('NodeMCU', servidor, 1883)
+#servidor = 'test.mosquitto.org' 
+servidor = '10.66.45.43' 
+cliente = MQTTClient('estacao-fatec', servidor, 1883)
 print('Conexao realizada.')
 
 #==============================================#
@@ -138,7 +146,7 @@ try:
             #-- Varre todos os dispositivos da rede e "pega" o 
             #   que eles estão escrevendo no intervalo de 1 segundo
             for i in dispositivos:
-                print('entrou no for')
+                #print('entrou no for')
             #==============================================#
             #===== Bloco de tratamento do Anemômetro ======#
             #==============================================#
@@ -177,7 +185,7 @@ try:
                         transicao = direcao
                     print("Direção do vento..........: ",transicao)
 #                     print("_________________________________________")
-                    strBufTransmissao[2] = str(direcao)
+                    dict_sensores['direcao_vento']=str(direcao)
 
             #==============================================#
             #======= Bloco de tratamento do sensor     ====#
@@ -189,8 +197,8 @@ try:
                     print("Umidade...................: {:2.2f}%".format(aht.humidity))
                     print("Temperatura...............: {:2.2f}ºC".format(aht.temperature))
                     #print("_________________________________________")
-                    strBufTransmissao[3] = str(aht.humidity)
-                    strBufTransmissao[4] = str(aht.temperature)
+                    dict_sensores['umidade']=str(aht.humidity)
+                    dict_sensores['temperatura']=str(aht.temperature)
 
             #==============================================#
             #======= Bloco de tratamento do sensor     ====#
@@ -207,8 +215,8 @@ try:
                     altitude = mpl.altitude() 
                     print("Altitude..................: {:2.2f}m ".format(altitude))
                     #print("_________________________________________")
-                    strBufTransmissao[5] = str(pressao)
-                    strBufTransmissao[6] = str(altitude)
+                    dict_sensores['pressao']=str(pressao)
+                    dict_sensores['altitude']=str(altitude)
 
             #==============================================#
             #======= Bloco de tratamento do sensor     ====#
@@ -218,7 +226,7 @@ try:
                 elif (i == 0x5a):
                     if taxaCO2.data_ready():
                         print(f"CO2........................: {taxaCO2.eCO2:.0f} ppm, tVOC: {taxaCO2.tVOC:.0f} ppb")
-                        strBufTransmissao[7] = str(taxaCO2.eCO2);
+                        dict_sensores['nivel_co2']= str(taxaCO2.eCO2);
 
             #==============================================#
             #======= Bloco de tratamento do sensor     ====#
@@ -236,13 +244,13 @@ try:
                                 print("_________________________________________")
                                 break
                             sleep(0.2)
-                    strBufTransmissao[8] = str(mesure_lux);
+                    dict_sensores['luminosidade']= = str(mesure_lux);
                     #print("Luminosidade: {}".format(mesure_lux))
 
-            #==============================================#
-            #======= Bloco de tratamento do sensor     ====#
-            #======= LM393 (Precipitação pluviométrica)  ==#
-            #==============================================#
+            #========================================================#
+            #======= Bloco de tratamento do sensor reed-switch   ====#
+            #======= Pluviometro (Precipitação pluviométrica)    ====#
+            #========================================================#
 
 #TODO: COLOCAR AQUI o HTML
             html = """<!DOCTYPE html><html><head><title></title><meta charset="utf-8"></head><body><form><p align="center">""" + str(strBufTransmissao) + """</p></form></body></html>"""
@@ -255,12 +263,32 @@ try:
         
             conteudo=[
                 dict_sensores['anem_m_seg'],
-                dict_sensores['anem_km_h'],   
+                dict_sensores['anem_km_h'],
+                dict_sensores['direcao_vento'],
+                dict_sensores['umidade'],
+                dict_sensores['temperatura'],
+                dict_sensores['pressao'],
+                dict_sensores['altitude'],
+                dict_sensores['nivel_co2'],
+                dict_sensores['luminosidade'],
+                dict_sensores['pluviometro']
             ]
-        
+            
+            #json = '{"anem_m_seg" : ' + conteudo[0]  + ', "anem_km_h" : ' + conteudo[1] + '}' 
+                        
             cliente.publish(dict_mqtt_topicos['anemometro_m_seg'].encode(), conteudo[0].encode())
             cliente.publish(dict_mqtt_topicos['anemometro_km_h'].encode(), conteudo[1].encode()) 
+            cliente.publish(dict_mqtt_topicos['direcao_vento'].encode(), conteudo[2].encode())
+            cliente.publish(dict_mqtt_topicos['umidade'].encode(), conteudo[3].encode())
+            cliente.publish(dict_mqtt_topicos['temperatura'].encode(), conteudo[4].encode())
+            cliente.publish(dict_mqtt_topicos['pressao'].encode(), conteudo[5].encode())
+            cliente.publish(dict_mqtt_topicos['altitude'].encode(), conteudo[6].encode())
+            cliente.publish(dict_mqtt_topicos['nivel_co2'].encode(), conteudo[7].encode())
+            cliente.publish(dict_mqtt_topicos['luminosidade'].encode(), conteudo[8].encode())
+            cliente.publish(dict_mqtt_topicos['pluviometro'].encode(), conteudo[9].encode())
 
+
+            
             cliente.disconnect() 
 
             print ('Envio realizado.') 
@@ -269,9 +297,10 @@ try:
             sleep(3)
 except Exception as Err:
 #except OSError as Err:
-    pass
+    print("Provável erro de comunicação com o dispositivo:",i)
+    resetar()
+    #pass
     #print("Erro:", Err, "\n", "Tipo do erro: ", type(Err).__name__)
-    #print("Provável erro de comunicação com o dispositivo:",i)
 
 except KeyboardInterrupt:
   s.close()
