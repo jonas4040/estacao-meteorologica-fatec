@@ -245,7 +245,7 @@ try:
                                 print("_________________________________________")
                                 break
                             sleep(0.2)
-                    dict_sensores['luminosidade']= = str(mesure_lux);
+                    dict_sensores['luminosidade']= str(mesure_lux);
                     #print("Luminosidade: {}".format(mesure_lux))
 
             #========================================================#
