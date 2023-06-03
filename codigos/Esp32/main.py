@@ -11,15 +11,15 @@
 #==  dados, Programação para Sistemas Embarcados I,  Eletrônica ==#
 #==  Digital II e Engenharia de Software I,  revisar  o projeto ==#
 #==  Estação Meteorológica FATEC anterior e apresentar uma nova ==#                                                                                                       ==#
-#==  proposta com base no microcontrolador ESP32,   sensores  e ==#
-#==  barramento I2C.                                            ==#
+#==  proposta com base no microcontrolador ESP32,   sensores,   ==#
+#==  barramento I2C e MQTT.                                     ==#
 #==                                                             ==#
 ###################################################################
 
 #== Importação de classes gerais
-from machine import Pin, I2C
+from machine import Pin, I2C, reset
 from time import time, sleep
-from time import ctime
+#from time import ctime
 
 #== Classes específicas do projeto (sensores)
 from anemometro import Anemometro   # Velocidade do vento
@@ -28,9 +28,9 @@ from aht import AHT2x               # Temperatura e umidade
 from ccs811 import CCS811           # Nível de Co2 e VTOC
 from RoTW import RoTW               # Rosa dos Ventos
 import bh1750                       # Luminosidade
-from pluviometro import Pluviometro
+#from pluviometro import Pluviometro
 
-#== Classes para configuração do ESP32 como servidor WEB E mqtt
+#== Classes para configuração do ESP32 ou como servidor Web ou broker MQTT
 from umqtt.simple import MQTTClient
 import usocket as socket
 import network
@@ -55,11 +55,6 @@ def localizaDispI2C():
         print("Endereço decimal: ",dispositivo," | Endereço hexadecimal: ",hex(dispositivo))
     return dispositivos
 
-#============= RECONECTA MQTT =================#
-def resetar():
-  print('Falha ao conectar ao MQTT broker. Resetando e reconectando...')
-  time.sleep(10)
-  machine.reset()
 #==============================================#
 
 #==============================================#
@@ -88,6 +83,7 @@ dict_mqtt_topicos = {
     'luminosidade': 'estacao/luminosidade',
     'pluviometro': 'estacao/pluviometro'}
 
+# Dicionario vazio a ser preenchido
 dict_sensores = {}
 
 html = """<!DOCTYPE html>
@@ -105,20 +101,28 @@ html = """<!DOCTYPE html>
 """
 print("Iniciando WiFi...")
 estacao = network.WLAN(network.STA_IF)
+
+# Ativa e desativa AP para evitar problemas de conexao
+estacao.active(False)
 estacao.active(True)
-estacao.connect('FatecJdi - Alunos', 'FatecJdi2023!')
+
+estacao.connect('SSIDexemplo', 'senha')
 #estacao.connect('Soares','Jomi11022016')
-#estacao.connect('','felipe100')
-#estacao.connect('Ez','12345678')
 
 while estacao.isconnected() == False:
     pass
 print(estacao.ifconfig())
-#s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-#s.bind(('', 80))
-#s.listen(5)
+
+''' # partes do servidor WEB comentadas para evitar problemas com MQTT
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+s.bind(('', 80))
+s.listen(5)
+'''
+
+# Ao inves deste, foi utilizado um broker interno (o Aedes) do Node-RED
 #servidor = 'test.mosquitto.org' 
-servidor = '10.66.45.43' 
+servidor = 'IPexemplo' 
+#servidor='192.168.128.116'
 cliente = MQTTClient('estacao-fatec', servidor, 1883)
 print('Conexao realizada.')
 
@@ -134,7 +138,8 @@ try:
 
         #-- Loop infinito caso exista algum dispositivo...
         while (True):
-            '''conexao, endereco = s.accept()
+            ''' # partes do servidor WEB comentadas para evitar problemas com MQTT
+            conexao, endereco = s.accept()
             print("Conexao de %s" % str(endereco))
             requisicao = conexao.recv(1024)
             requisicao = str(requisicao)
@@ -151,7 +156,8 @@ try:
             #==============================================#
             #===== Bloco de tratamento do Anemômetro ======#
             #==============================================#
-
+            
+                # ! Para cada sensor i2c, eh atribuido um endereço hexadecimal
                 if i == 0x9:
 
                     #-- Constantes para cálculo de velocidade do anemômetro
@@ -252,6 +258,8 @@ try:
             #======= Bloco de tratamento do sensor reed-switch   ====#
             #======= Pluviometro (Precipitação pluviométrica)    ====#
             #========================================================#
+                ''' # Biblioteca ctime, nao funciona no micropython, somente em python convencional
+                    # Caso for necessario, utilizar modulo RTC i2c, com memoria EEPROM
                 pluv = Pluviometro(23, 0.7859503363)
                 pluv.iniciar_medicao()
                    
@@ -261,13 +269,8 @@ try:
                 
                 if (hora == 23) and (minunto >= 59):
                     pluv._set_cont_pulso(0)
-                
-                
-                
-                    
-                    
-
-#TODO: COLOCAR AQUI o HTML
+                '''
+# COLOCAR AQUI o HTML caso for necessario
             html = """<!DOCTYPE html><html><head><title></title><meta charset="utf-8"></head><body><form><p align="center">""" + str(strBufTransmissao) + """</p></form></body></html>"""
             #conexao.sendall(html)
             #conexao.close()
@@ -275,7 +278,8 @@ try:
             print('Publicando no servidor MQTT') 
             
             cliente.connect()
-        
+            
+            # lista que recebe o valor medido pelos sensores
             conteudo=[
                 dict_sensores['anem_m_seg'],
                 dict_sensores['anem_km_h'],
@@ -307,13 +311,13 @@ try:
             cliente.disconnect() 
 
             print ('Envio realizado.') 
-
+            
+            # Envia valores a cada 3 segundos
             gc.collect()
             sleep(3)
 except Exception as Err:
 #except OSError as Err:
     print("Provável erro de comunicação com o dispositivo:",i)
-    resetar()
     #pass
     #print("Erro:", Err, "\n", "Tipo do erro: ", type(Err).__name__)
 
